@@ -42,7 +42,15 @@ macro(__find_package_from_pkg_config module)
 
   if (NOT TARGET ${package}::${package})
     add_library(${package}::${package} INTERFACE IMPORTED GLOBAL)
-    set_target_properties(${package}::${package} PROPERTIES INTERFACE_LINK_LIBRARIES PkgConfig::${module})
+    if (NOT TARGET PkgConfig::${module})
+      set_target_properties(${package}::${package} PROPERTIES
+        INTERFACE_LINK_LIBRARIES "${${module}_LIBRARIES}"
+        INTERFACE_INCLUDE_DIRS "${${module}_INCLUDE_DIRS}"
+        INTERFACE_COMPILE_OPTIONS "${${module}_CFLAGS_OTHER}"
+      )
+    else()
+      set_target_properties(${package}::${package} PROPERTIES INTERFACE_LINK_LIBRARIES PkgConfig::${module})
+    endif()
     message(STATUS "Found ${package} ${PACKAGE_VERSION} (system)")
   endif()
 
